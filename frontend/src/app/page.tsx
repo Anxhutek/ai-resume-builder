@@ -1660,23 +1660,35 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Resume Page Sheet */}
-            <div className="lg:col-span-2 bg-white text-gray-900 shadow-2xl rounded-xl p-8 font-serif" id="resume-sheet">
+            <div 
+              className={`lg:col-span-2 bg-white text-gray-900 shadow-2xl rounded-xl p-8 transition-all duration-300
+                ${form.preferences.fontFamily === 'serif' ? 'font-serif' : form.preferences.fontFamily === 'mono' ? 'font-mono' : 'font-sans'}`}
+              id="resume-sheet"
+            >
               {/* Header */}
-              <div className="text-center border-b-2 border-gray-900 pb-4 mb-5">
-                <h1 className="text-3xl font-bold tracking-tight">{resume.name}</h1>
-                <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-600">
+              <div 
+                className={`text-center pb-4 mb-5 border-b-2`}
+                style={{ borderColor: form.preferences.accentColor }}
+              >
+                <h1 className="text-3.5xl font-extrabold tracking-tight" style={{ color: form.preferences.accentColor }}>
+                  {resume.name}
+                </h1>
+                <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-2 text-xs font-semibold text-gray-600">
                   {resume.contact.email && <span>{resume.contact.email}</span>}
                   {resume.contact.phone && <span>{resume.contact.phone}</span>}
                   {resume.contact.location && <span>{resume.contact.location}</span>}
-                  {resume.contact.linkedin && <span>{resume.contact.linkedin}</span>}
-                  {resume.contact.github && <span>{resume.contact.github}</span>}
+                  {resume.contact.linkedin && <span className="underline">{resume.contact.linkedin}</span>}
+                  {resume.contact.github && <span className="underline">{resume.contact.github}</span>}
                 </div>
               </div>
 
               {/* Summary */}
               {resume.summary && (
-                <section className="mb-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-1.5">
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-1.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
                     Summary
                   </h3>
                   <p className="text-xs text-gray-700 leading-relaxed">{resume.summary}</p>
@@ -1685,18 +1697,23 @@ export default function HomePage() {
 
               {/* Experience */}
               {resume.experience && resume.experience.length > 0 && (
-                <section className="mb-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-2">
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-2.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
                     Experience
                   </h3>
                   {resume.experience.map((exp, i) => (
-                    <div key={i} className="mb-3">
+                    <div key={i} className="mb-4">
                       <div className="flex justify-between items-baseline">
-                        <h4 className="font-bold text-xs text-gray-900">{exp.title}</h4>
-                        <span className="text-[10px] text-gray-500">{exp.duration}</span>
+                        <h4 className="font-extrabold text-xs text-gray-900">{exp.title}</h4>
+                        <span className="text-[10px] text-gray-500 font-semibold">{exp.duration}</span>
                       </div>
-                      <p className="text-[10px] text-gray-600 mb-1">{exp.company} • {exp.location}</p>
-                      <ul className="list-disc list-inside space-y-0.5 pl-1">
+                      <p className="text-[10px] font-bold text-gray-600 mb-1.5" style={{ color: `${form.preferences.accentColor}dd` }}>
+                        {exp.company} • {exp.location}
+                      </p>
+                      <ul className="list-disc list-inside space-y-1 pl-1">
                         {exp.bullets.map((b, j) => (
                           <li key={j} className="text-[11px] text-gray-700 leading-relaxed">{b}</li>
                         ))}
@@ -1708,31 +1725,39 @@ export default function HomePage() {
 
               {/* Skills */}
               {resume.skills && (
-                <section className="mb-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-1.5">
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-1.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
                     Skills
                   </h3>
-                  <div className="space-y-0.5 text-xs text-gray-700">
-                    <p><span className="font-semibold">Technical:</span> {resume.skills.technical.join(', ')}</p>
-                    <p><span className="font-semibold">Tools:</span> {resume.skills.tools.join(', ')}</p>
-                    <p><span className="font-semibold">Soft:</span> {resume.skills.soft.join(', ')}</p>
+                  <div className="space-y-1 text-xs text-gray-700">
+                    <p><span className="font-bold">Technical Skills:</span> {resume.skills.technical.join(', ')}</p>
+                    <p><span className="font-bold">Tools & Tech:</span> {resume.skills.tools.join(', ')}</p>
+                    <p><span className="font-bold">Soft Skills:</span> {resume.skills.soft.join(', ')}</p>
                   </div>
                 </section>
               )}
 
               {/* Projects */}
               {resume.projects && resume.projects.length > 0 && (
-                <section className="mb-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-2">
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-2.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
                     Projects
                   </h3>
                   {resume.projects.map((p, i) => (
-                    <div key={i} className="mb-2">
+                    <div key={i} className="mb-3">
                       <div className="flex justify-between items-baseline">
-                        <h4 className="font-bold text-xs text-gray-900">{p.name}</h4>
-                        <span className="text-[10px] text-gray-500">{p.tech_stack.join(' • ')}</span>
+                        <h4 className="font-extrabold text-xs text-gray-900">{p.name}</h4>
+                        <span className="text-[10px] text-gray-500 font-semibold" style={{ color: form.preferences.accentColor }}>
+                          {p.tech_stack.join(' • ')}
+                        </span>
                       </div>
-                      <p className="text-[11px] text-gray-700 mt-0.5">{p.description}</p>
+                      <p className="text-[11px] text-gray-700 mt-1 leading-relaxed">{p.description}</p>
                     </div>
                   ))}
                 </section>
