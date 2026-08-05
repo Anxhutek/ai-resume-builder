@@ -30,7 +30,7 @@ class UserInfo(BaseModel):
 
 
 class GenerateResumeRequest(BaseModel):
-    job_description: str = Field(..., min_length=50, max_length=5000)
+    job_description: str = Field(..., min_length=1, max_length=5000)
     user_info: UserInfo
     tone: ToneEnum = ToneEnum.professional
 
@@ -38,11 +38,11 @@ class GenerateResumeRequest(BaseModel):
 class ImproveSectionRequest(BaseModel):
     section: str = Field(..., description="summary | experience | skills | projects")
     content: str = Field(..., min_length=10)
-    job_description: str = Field(..., min_length=20)
+    job_description: str = Field(..., min_length=1)
 
 
 class CoverLetterRequest(BaseModel):
-    job_description: str = Field(..., min_length=50)
+    job_description: str = Field(..., min_length=1)
     resume_data: Dict
     company_name: str = Field(..., min_length=2)
 
