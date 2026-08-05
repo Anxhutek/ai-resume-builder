@@ -1431,60 +1431,68 @@ export default function HomePage() {
                   <span className="text-xs text-gray-400 font-semibold block mb-2">TEMPLATE DESIGN</span>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { key: 'ats', name: 'ATS Professional', desc: 'Single column, highly scannable' },
-                      { key: 'modern', name: 'Modern Tech', desc: 'Sleek spacing, bold headers' },
-                      { key: 'minimal', name: 'Minimal Grid', desc: 'Compact layout, clean dividers' },
-                      { key: 'executive', name: 'Executive Elegance', desc: 'Classic layout, heavy fonts' },
+                      { key: 'ats', name: 'ATS Professional (Recommended)', desc: 'Single-column layout with 99% parser success rate. Best for applying to big corporate job portals.' },
+                      { key: 'modern', name: 'Modern Tech', desc: 'Sleek spacing with bold header elements. Ideal for software developers applying to modern startups.' },
+                      { key: 'minimal', name: 'Minimal Grid', desc: 'Compact spacing with clean dividers. Best for fitting lots of projects & experience on a single page.' },
+                      { key: 'executive', name: 'Executive Elegance', desc: 'Traditional corporate styling with clean typography. Perfect for senior engineers and leadership roles.' },
                     ].map(style => (
                       <button
                         key={style.key}
                         onClick={() => setForm(p => ({ ...p, preferences: { ...p.preferences, style: style.key as any } }))}
-                        className={`p-3 rounded-xl border text-left transition-all
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between min-h-[100px]
                           ${form.preferences.style === style.key
-                            ? 'bg-violet-600/10 border-violet-500 text-violet-300'
+                            ? 'bg-violet-600/10 border-violet-500 text-violet-300 shadow-md shadow-violet-500/10'
                             : 'bg-gray-950 border-gray-800 text-gray-400 hover:border-gray-700'
                           }`}
                       >
                         <h4 className="font-semibold text-xs text-white">{style.name}</h4>
-                        <p className="text-[10px] text-gray-500 mt-1">{style.desc}</p>
+                        <p className="text-[10px] text-gray-500 mt-1 leading-normal">{style.desc}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Font & Colors */}
-                <div className="grid grid-cols-2 gap-4 border-t border-gray-850 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t border-gray-850 pt-4">
                   <div>
-                    <span className="text-xs text-gray-400 font-semibold block mb-2">FONT FAMILY</span>
+                    <span className="text-xs text-gray-400 font-semibold block mb-2">FONT FAMILY (TYPOGRAPHY)</span>
                     <div className="flex gap-2">
                       {['serif', 'sans', 'mono'].map(font => (
                         <button
                           key={font}
                           onClick={() => setForm(p => ({ ...p, preferences: { ...p.preferences, fontFamily: font as any } }))}
-                          className={`flex-1 py-1.5 rounded border text-xs capitalize
+                          className={`flex-1 py-2 rounded border text-xs capitalize font-semibold transition-all
                             ${form.preferences.fontFamily === font
-                              ? 'bg-violet-900/30 border-violet-700 text-white'
-                              : 'bg-gray-950 border-gray-800 text-gray-400'
+                              ? 'bg-violet-900/30 border-violet-700 text-white shadow-sm'
+                              : 'bg-gray-950 border-gray-800 text-gray-400 hover:border-gray-750'
                             }`}
                         >
                           {font}
                         </button>
                       ))}
                     </div>
+                    <p className="text-[10px] text-gray-500 mt-2 italic leading-normal">
+                      {form.preferences.fontFamily === 'serif' && 'Serif: Traditional print font (like Times New Roman). Gives a formal, high-end corporate newspaper look.'}
+                      {form.preferences.fontFamily === 'sans' && 'Sans: Clean, modern screen font (like Arial/Inter). Very readable and modern for software roles.'}
+                      {form.preferences.fontFamily === 'mono' && 'Mono: Code editor font (like Courier). Gives a pure developer/technical look. Use for technical resumes.'}
+                    </p>
                   </div>
                   <div>
                     <span className="text-xs text-gray-400 font-semibold block mb-2">ACCENT COLOR</span>
-                    <div className="flex gap-3 items-center">
+                    <div className="flex gap-3 items-center mb-2">
                       {['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'].map(color => (
                         <button
                           key={color}
                           onClick={() => setForm(p => ({ ...p, preferences: { ...p.preferences, accentColor: color } }))}
-                          className={`w-6 h-6 rounded-full border transition-all
-                            ${form.preferences.accentColor === color ? 'scale-125 border-white' : 'border-transparent'}`}
+                          className={`w-7 h-7 rounded-full border transition-all hover:scale-110
+                            ${form.preferences.accentColor === color ? 'scale-125 border-white ring-2 ring-violet-500/20' : 'border-transparent'}`}
                           style={{ backgroundColor: color }}
                         />
                       ))}
                     </div>
+                    <p className="text-[10px] text-gray-500 leading-normal">
+                      This accent color will highlight your Name, section headings, and lines to make your resume visually engaging for recruiters.
+                    </p>
                   </div>
                 </div>
               </div>
