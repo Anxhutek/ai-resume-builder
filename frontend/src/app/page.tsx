@@ -172,6 +172,29 @@ export default function HomePage() {
   const [step, setStep] = useState(1);
   const [aiSuggestionsActive, setAiSuggestionsActive] = useState(false);
 
+  // Auto-initialize Class 10/12 education templates for Freshers
+  useEffect(() => {
+    if (step === 4 && form.education.length === 0) {
+      if (form.profileType === 'fresher') {
+        setForm(p => ({
+          ...p,
+          education: [
+            { institution: '', degree: 'Graduation / B.Tech', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+            { institution: '', degree: 'Class XII (12th)', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+            { institution: '', degree: 'Class X (10th)', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
+          ]
+        }));
+      } else {
+        setForm(p => ({
+          ...p,
+          education: [
+            { institution: '', degree: 'Graduation / B.Tech', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
+          ]
+        }));
+      }
+    }
+  }, [step, form.profileType, form.education.length]);
+
   // Dynamic Step Configurator
   const getSteps = () => {
     const baseSteps = [
@@ -658,6 +681,22 @@ export default function HomePage() {
                               placeholder="B.Tech"
                               className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
                             />
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              {['B.Tech', 'M.Tech', 'Class XII (12th)', 'Class X (10th)'].map(d => (
+                                <button
+                                  key={d}
+                                  type="button"
+                                  onClick={() => setForm(p => {
+                                    const eduList = [...p.education];
+                                    eduList[idx].degree = d;
+                                    return { ...p, education: eduList };
+                                  })}
+                                  className="text-[9px] bg-gray-900 border border-gray-850 px-2 py-0.5 rounded text-gray-400 hover:border-violet-500 hover:text-white"
+                                >
+                                  {d}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                           <div>
                             <label className="text-[10px] text-gray-400">Branch *</label>
@@ -674,6 +713,22 @@ export default function HomePage() {
                               placeholder="Computer Science"
                               className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
                             />
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              {['Computer Science', 'Science (PCM)', 'Commerce', 'General'].map(b => (
+                                <button
+                                  key={b}
+                                  type="button"
+                                  onClick={() => setForm(p => {
+                                    const eduList = [...p.education];
+                                    eduList[idx].branch = b;
+                                    return { ...p, education: eduList };
+                                  })}
+                                  className="text-[9px] bg-gray-900 border border-gray-850 px-2 py-0.5 rounded text-gray-400 hover:border-violet-500 hover:text-white"
+                                >
+                                  {b}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                           <div>
                             <label className="text-[10px] text-gray-400">CGPA / Percentage</label>
