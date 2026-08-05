@@ -445,6 +445,23 @@ export default function HomePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <button
+                    onClick={() => {
+                      triggerMockExtraction('upload');
+                      setStep(15);
+                    }}
+                    className="p-4 bg-violet-950/20 border border-violet-800/40 rounded-xl hover:border-violet-500 transition-all text-left flex items-start gap-3 col-span-1 md:col-span-2 group"
+                  >
+                    <span className="text-xl">⚡</span>
+                    <div>
+                      <h4 className="font-semibold text-white group-hover:text-violet-400 transition-colors">
+                        Quick Demo Mode (One-Click Auto Fill & Skip)
+                      </h4>
+                      <p className="text-xs text-violet-300/80 mt-1">
+                        Populates all form fields with a premium Software Developer profile and skips directly to the final compile step.
+                      </p>
+                    </div>
+                  </button>
+                  <button
                     onClick={() => triggerMockExtraction('upload')}
                     className="p-4 bg-gray-950 border border-gray-800 rounded-xl hover:border-violet-500 transition-all text-left flex items-start gap-3 group"
                   >
