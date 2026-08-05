@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { api, GenerateResumeRequest, ResumeData } from '@/lib/api';
 
 interface UseResumeReturn {
@@ -11,6 +11,7 @@ interface UseResumeReturn {
   processingTime: number | null;
   generateResume: (data: GenerateResumeRequest) => Promise<void>;
   improveSection: (section: string, content: string, jobDesc: string) => Promise<string>;
+  setResume: React.Dispatch<React.SetStateAction<ResumeData | null>>;
   reset: () => void;
 }
 
@@ -60,5 +61,5 @@ export function useResume(): UseResumeReturn {
     setProcessingTime(null);
   }, []);
 
-  return { resume, isGenerating, isImproving, error, processingTime, generateResume, improveSection, reset };
+  return { resume, isGenerating, isImproving, error, processingTime, generateResume, improveSection, setResume, reset };
 }

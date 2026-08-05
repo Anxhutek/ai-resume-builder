@@ -1688,7 +1688,7 @@ export default function HomePage() {
                         resume.summary,
                         form.jobDescription
                       );
-                      setResume(prev => prev ? { ...prev, summary: improved.improved_content } : null);
+                      setResume((prev: ResumeData | null) => prev ? { ...prev, summary: improved.improved_content } : null);
                     }}
                     className="w-full text-left py-2 px-3 bg-gray-950 border border-gray-850 rounded-lg text-xs hover:border-violet-500 transition-all font-semibold"
                   >
