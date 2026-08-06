@@ -1065,9 +1065,10 @@ export default function HomePage() {
                           <span className="text-[11px] text-gray-400">Currently studying here</span>
                         </label>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
+              )}
               </div>
             )}
 
