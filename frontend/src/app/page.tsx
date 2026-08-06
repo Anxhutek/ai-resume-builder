@@ -14,6 +14,7 @@ interface EducationEntry {
   startYear: string;
   endYear: string;
   currentlyStudying: boolean;
+  semesters?: string[];
 }
 
 interface ProjectEntry {
@@ -204,14 +205,14 @@ export default function HomePage() {
     let seeded: Array<any> = [];
     if (lvl === 'post_grad') {
       seeded = [
-        { degree: 'M.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
-        { degree: 'B.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'M.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false, semesters: ['', '', '', ''] },
+        { degree: 'B.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false, semesters: ['', '', '', '', '', '', '', ''] },
         { degree: 'Class XII (12th)', institution: '', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
         { degree: 'Class X (10th)', institution: '', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
       ];
     } else if (lvl === 'under_grad') {
       seeded = [
-        { degree: 'B.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'B.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false, semesters: ['', '', '', '', '', '', '', ''] },
         { degree: 'Class XII (12th)', institution: '', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
         { degree: 'Class X (10th)', institution: '', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
       ];
@@ -871,6 +872,50 @@ export default function HomePage() {
                                 className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
                               />
                             </div>
+
+                            {/* Semester GPA Grid (Auto calculations) */}
+                            {edu.semesters && (
+                              <div className="col-span-2 bg-gray-900/40 border border-gray-850 p-3 rounded-lg space-y-2 mt-1">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">📊 Semester GPA Breakdown (Optional)</span>
+                                  <span className="text-[9px] text-violet-400 italic">Auto-calculates overall CGPA</span>
+                                </div>
+                                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+                                  {edu.semesters.map((semVal, semIdx) => (
+                                    <div key={semIdx}>
+                                      <label className="text-[9px] text-gray-500 block mb-0.5 font-semibold text-center">Sem {semIdx + 1}</label>
+                                      <input
+                                        type="text"
+                                        value={semVal}
+                                        onChange={e => {
+                                          const val = e.target.value;
+                                          setForm(p => {
+                                            const eduList = [...p.education];
+                                            const semList = [...(eduList[idx].semesters || [])];
+                                            semList[semIdx] = val;
+                                            eduList[idx].semesters = semList;
+
+                                            // Calculate average of filled semesters
+                                            const filledValues = semList
+                                              .map(v => parseFloat(v))
+                                              .filter(v => !isNaN(v));
+                                            
+                                            if (filledValues.length > 0) {
+                                              const avg = filledValues.reduce((sum, curr) => sum + curr, 0) / filledValues.length;
+                                              eduList[idx].gpa = `${avg.toFixed(2)} CGPA`;
+                                            }
+                                            
+                                            return { ...p, education: eduList };
+                                          });
+                                        }}
+                                        placeholder="8.5"
+                                        className="w-full bg-gray-950 border border-gray-800 rounded px-1.5 py-1 text-center text-xs text-white placeholder-gray-700 focus:border-violet-500 focus:outline-none transition-all"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             <div>
                               <label className="text-[10px] text-gray-400 font-semibold block mb-1">Start Year *</label>
                               <input
