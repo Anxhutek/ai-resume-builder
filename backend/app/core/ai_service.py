@@ -13,19 +13,36 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiService:
-    """Production-ready Gemini AI integration."""
+    """Production-ready Gemini AI integration supporting both AI Studio (API Key) and Vertex AI (Credentials)."""
 
     def __init__(self):
+        self.use_vertex = False
+        import os
+        
+        # 1. Try initializing Vertex AI client if credentials file is present
+        cred_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+        if cred_path and os.path.exists(cred_path):
+            try:
+                import vertexai
+                from vertexai.generative_models import GenerativeModel
+                vertexai.init(project='project-1216ad02-cf4a-4c3a-ad8', location='us-central1')
+                self.vertex_model = GenerativeModel("gemini-1.5-flash")
+                self.use_vertex = True
+                logger.info("Vertex AI Service successfully initialized using credentials JSON.")
+            except Exception as e:
+                logger.warning(f"Vertex AI initialization failed (API disabled or missing dependency): {e}")
+
+        # 2. Configure standard Google Generative AI (AI Studio SDK) as fallback
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
+        self.studio_model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
             generation_config={
                 "temperature": 0.7,
                 "top_p": 0.95,
                 "max_output_tokens": 8192,
             },
         )
-        logger.info("Gemini AI Service initialized (gemini-3.5-flash)")
+        logger.info("GenerativeAI (AI Studio) SDK initialized.")
 
     async def generate_resume(
         self,
@@ -46,15 +63,30 @@ class GeminiService:
         """
         prompt = self._build_resume_prompt(job_description, user_info, tone)
 
+        # Mode A: Attempt via Vertex AI
+        if self.use_vertex:
+            try:
+                logger.info("Attempting resume generation via Vertex AI...")
+                response = await asyncio.to_thread(
+                    self.vertex_model.generate_content, prompt
+                )
+                parsed = self._parse_resume_response(response.text)
+                logger.info("✅ Resume generated successfully via Vertex AI")
+                return parsed
+            except Exception as vertex_err:
+                logger.error(f"❌ Vertex AI generation failed: {vertex_err}. Falling back to AI Studio API Key...")
+
+        # Mode B: Attempt via AI Studio SDK
         try:
+            logger.info("Attempting resume generation via AI Studio SDK...")
             response = await asyncio.to_thread(
-                self.model.generate_content, prompt
+                self.studio_model.generate_content, prompt
             )
             parsed = self._parse_resume_response(response.text)
-            logger.info("✅ Resume generated successfully")
+            logger.info("✅ Resume generated successfully via AI Studio")
             return parsed
-        except Exception as e:
-            logger.error(f"❌ Gemini API error: {e}. Falling back to high-quality ATS-optimized Mock Resume.")
+        except Exception as studio_err:
+            logger.error(f"❌ AI Studio API error: {studio_err}. Falling back to high-quality ATS-optimized Mock Resume.")
             return self._get_mock_resume(user_info)
 
     def _get_mock_resume(self, user_info: dict) -> dict:
