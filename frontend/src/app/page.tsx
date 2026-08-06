@@ -200,28 +200,33 @@ export default function HomePage() {
   const [step, setStep] = useState(1);
   const [aiSuggestionsActive, setAiSuggestionsActive] = useState(false);
 
-  // Auto-initialize Class 10/12 education templates for Freshers
-  useEffect(() => {
-    if (step === 4 && form.education.length === 0) {
-      if (form.profileType === 'fresher') {
-        setForm(p => ({
-          ...p,
-          education: [
-            { institution: '', degree: 'Graduation / B.Tech', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
-            { institution: '', degree: 'Class XII (12th)', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
-            { institution: '', degree: 'Class X (10th)', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
-          ]
-        }));
-      } else {
-        setForm(p => ({
-          ...p,
-          education: [
-            { institution: '', degree: 'Graduation / B.Tech', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
-          ]
-        }));
-      }
+  const handleSelectHighestLvl = (lvl: string) => {
+    let seeded: Array<any> = [];
+    if (lvl === 'post_grad') {
+      seeded = [
+        { degree: 'M.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'B.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'Class XII (12th)', institution: '', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'Class X (10th)', institution: '', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
+      ];
+    } else if (lvl === 'under_grad') {
+      seeded = [
+        { degree: 'B.Tech', institution: '', branch: 'Computer Science', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'Class XII (12th)', institution: '', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'Class X (10th)', institution: '', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
+      ];
+    } else if (lvl === 'school_12') {
+      seeded = [
+        { degree: 'Class XII (12th)', institution: '', branch: 'Science (PCM)', gpa: '', startYear: '', endYear: '', currentlyStudying: false },
+        { degree: 'Class X (10th)', institution: '', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
+      ];
+    } else if (lvl === 'school_10') {
+      seeded = [
+        { degree: 'Class X (10th)', institution: '', branch: 'General', gpa: '', startYear: '', endYear: '', currentlyStudying: false }
+      ];
     }
-  }, [step, form.profileType, form.education.length]);
+    setForm(p => ({ ...p, education: seeded }));
+  };
 
   // Dynamic Step Configurator
   const getSteps = () => {
@@ -654,33 +659,60 @@ export default function HomePage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold text-white text-lg">Education History</h3>
-                  <button
-                    onClick={() =>
-                      setForm(p => ({
-                        ...p,
-                        education: [
-                          ...p.education,
-                          {
-                            institution: '',
-                            degree: '',
-                            branch: '',
-                            gpa: '',
-                            startYear: '',
-                            endYear: '',
-                            currentlyStudying: false,
-                          },
-                        ],
-                      }))
-                    }
-                    className="text-xs text-violet-400 hover:text-violet-300 font-semibold"
-                  >
-                    + Add Entry
-                  </button>
+                  <div className="flex gap-3">
+                    {form.education.length > 0 && (
+                      <button
+                        onClick={() => setForm(p => ({ ...p, education: [] }))}
+                        className="text-xs text-gray-400 hover:text-gray-300 font-semibold"
+                      >
+                        ↩️ Reset Levels
+                      </button>
+                    )}
+                    <button
+                      onClick={() =>
+                        setForm(p => ({
+                          ...p,
+                          education: [
+                            ...p.education,
+                            {
+                              institution: '',
+                              degree: '',
+                              branch: '',
+                              gpa: '',
+                              startYear: '',
+                              endYear: '',
+                              currentlyStudying: false,
+                            },
+                          ],
+                        }))
+                      }
+                      className="text-xs text-violet-400 hover:text-violet-300 font-semibold"
+                    >
+                      + Add Entry
+                    </button>
+                  </div>
                 </div>
 
                 {form.education.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 text-sm">
-                    No education entries added yet. Click "+ Add Entry" to build profile.
+                  <div className="space-y-4 py-4 text-center">
+                    <p className="text-xs text-gray-400 font-medium">Select your highest level of education. We will automatically generate the corresponding forms for all levels below it.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-lg mx-auto pt-2">
+                      {[
+                        { key: 'post_grad', title: "Post-Graduation (Master's / MBA)", desc: "Seeds PG, Graduation, Class 12, and Class 10 forms" },
+                        { key: 'under_grad', title: "Under-Graduation (Bachelor's)", desc: "Seeds Graduation, Class 12, and Class 10 forms" },
+                        { key: 'school_12', title: "Class XII (12th Grade / Inter)", desc: "Seeds Class 12 and Class 10 forms" },
+                        { key: 'school_10', title: "Class X (10th Grade / Matric)", desc: "Seeds Class 10 form only" }
+                      ].map(opt => (
+                        <button
+                          key={opt.key}
+                          onClick={() => handleSelectHighestLvl(opt.key)}
+                          className="p-4 bg-gray-950 border border-gray-850 hover:border-violet-500 rounded-xl transition-all text-left flex flex-col justify-center min-h-[90px] group"
+                        >
+                          <span className="font-bold text-xs text-white group-hover:text-violet-400 transition-colors">{opt.title}</span>
+                          <span className="text-[10px] text-gray-500 mt-1 leading-normal">{opt.desc}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-[360px] overflow-y-auto pr-2">
