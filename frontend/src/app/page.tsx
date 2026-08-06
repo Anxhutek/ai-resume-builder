@@ -419,6 +419,8 @@ export default function HomePage() {
         education: form.education.map(e => `${e.degree} in ${e.branch} at ${e.institution} (${e.startYear}-${e.endYear}), GPA: ${e.gpa}`).join('\n'),
         skills: [...form.skills.technical, ...form.skills.tools, ...form.skills.soft].join(', '),
         projects: form.projects.map(p => `${p.name} (${p.duration}): ${p.description}. Tech stack: ${p.tech_stack.join(', ')}`).join('\n'),
+        achievements: form.achievements.filter(a => a.trim().length > 0).join('\n'),
+        extra_activities: form.extraActivities.filter(a => a.trim().length > 0).join('\n'),
       },
       tone: 'professional',
     };
@@ -2026,6 +2028,30 @@ export default function HomePage() {
                 </section>
               )}
 
+              {/* Education */}
+              {resume.education && resume.education.length > 0 && (
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-2.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
+                    Education
+                  </h3>
+                  {resume.education.map((edu, i) => (
+                    <div key={i} className="mb-3 flex justify-between items-start">
+                      <div>
+                        <h4 className="font-extrabold text-xs text-gray-900">{edu.degree}</h4>
+                        <p className="text-[10px] text-gray-600 font-semibold">{edu.institution}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-gray-500 font-semibold block">{edu.year}</span>
+                        {edu.gpa && <span className="text-[10px] text-gray-500 font-semibold block">GPA: {edu.gpa}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+              )}
+
               {/* Projects */}
               {resume.projects && resume.projects.length > 0 && (
                 <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
@@ -2046,6 +2072,60 @@ export default function HomePage() {
                       <p className="text-[11px] text-gray-700 mt-1 leading-relaxed">{p.description}</p>
                     </div>
                   ))}
+                </section>
+              )}
+
+              {/* Certifications */}
+              {resume.certifications && resume.certifications.length > 0 && (
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-2.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
+                    Certifications & Coursework
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs text-gray-700">
+                    {resume.certifications.map((cert, i) => (
+                      <div key={i} className="flex justify-between border-b border-gray-100 pb-1">
+                        <span className="font-bold text-gray-900">{cert.name}</span>
+                        <span className="text-gray-500 font-semibold text-[10px]">{cert.issuer} ({cert.year})</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Achievements */}
+              {resume.achievements && resume.achievements.length > 0 && (
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-2.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
+                    Key Achievements
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1 pl-1">
+                    {resume.achievements.map((ach, i) => (
+                      <li key={i} className="text-[11px] text-gray-700 leading-relaxed">{ach}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* Extra Activities & Leadership */}
+              {resume.extra_activities && resume.extra_activities.length > 0 && (
+                <section className={`mb-5 ${form.preferences.style === 'modern' ? 'border-l-2 pl-3' : ''}`} style={{ borderColor: form.preferences.accentColor }}>
+                  <h3 
+                    className="text-xs font-bold uppercase tracking-wider border-b pb-0.5 mb-2.5"
+                    style={{ color: form.preferences.accentColor, borderColor: `${form.preferences.accentColor}20` }}
+                  >
+                    Extracurriculars & Leadership
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1 pl-1">
+                    {resume.extra_activities.map((act, i) => (
+                      <li key={i} className="text-[11px] text-gray-700 leading-relaxed">{act}</li>
+                    ))}
+                  </ul>
                 </section>
               )}
             </div>

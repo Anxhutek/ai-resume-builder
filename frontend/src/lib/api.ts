@@ -16,6 +16,7 @@ export interface UserInfo {
   skills: string;
   projects?: string;
   achievements?: string;
+  extra_activities?: string;
 }
 
 export interface GenerateResumeRequest {
@@ -64,6 +65,8 @@ export interface ResumeData {
     issuer: string;
     year: string;
   }>;
+  achievements: string[];
+  extra_activities: string[];
   ats_keywords: string[];
   match_score: number;
 }

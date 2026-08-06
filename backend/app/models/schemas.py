@@ -27,6 +27,7 @@ class UserInfo(BaseModel):
     skills: str = Field(..., description="Technical and soft skills")
     projects: Optional[str] = None
     achievements: Optional[str] = None
+    extra_activities: Optional[str] = None
 
 
 class GenerateResumeRequest(BaseModel):
@@ -102,6 +103,8 @@ class ResumeData(BaseModel):
     skills: SkillsSection
     projects: List[ProjectItem] = []
     certifications: List[CertificationItem] = []
+    achievements: List[str] = []
+    extra_activities: List[str] = []
     ats_keywords: List[str] = []
     match_score: int = Field(ge=0, le=100, default=0)
 

@@ -259,7 +259,29 @@ class GeminiService:
                 }
             ]
 
-        # 6. Generate Summary
+        # 6. Parse Achievements
+        achievements_list = []
+        raw_ach = user_info.get("achievements", "")
+        if raw_ach:
+            achievements_list = [l.strip() for l in raw_ach.split('\n') if l.strip()]
+        else:
+            achievements_list = [
+                "Won College Hackathon 2024 (Rank 1/300 teams)",
+                "5-Star Coder on CodeChef (Max Rating: 2150)"
+            ]
+            
+        # 7. Parse Extra Activities
+        activities_list = []
+        raw_act = user_info.get("extra_activities", "")
+        if raw_act:
+            activities_list = [l.strip() for l in raw_act.split('\n') if l.strip()]
+        else:
+            activities_list = [
+                "Open Source contributor to FastAPI repository",
+                "Volunteered at local community education centers"
+            ]
+
+        # 8. Generate Summary
         summary_tech = ", ".join(skills["technical"][:3])
         summary = f"Dedicated professional with expertise in {summary_tech}. Proven ability to design and build scalable applications using {', '.join(skills['tools'][:3])}. Experienced in optimizing code efficiency and implementing robust developer features."
 
@@ -286,6 +308,8 @@ class GeminiService:
                     "year": "2024"
                 }
             ],
+            "achievements": achievements_list,
+            "extra_activities": activities_list,
             "ats_keywords": ats_keywords,
             "match_score": 92
         }
@@ -379,6 +403,7 @@ class GeminiService:
         Skills: {user_info.get('skills', '')}
         Projects: {user_info.get('projects', '')}
         Achievements: {user_info.get('achievements', '')}
+        Extra Activities / Leadership: {user_info.get('extra_activities', '')}
         
         TONE: {tone}
         
@@ -435,6 +460,8 @@ class GeminiService:
                     "year": "2023"
                 }}
             ],
+            "achievements": ["Professional Achievement Bullet 1", "Professional Achievement Bullet 2"],
+            "extra_activities": ["Volunteering or club activity bullet 1", "Volunteering or club activity bullet 2"],
             "ats_keywords": ["keyword1", "keyword2"],
             "match_score": 85
         }}
