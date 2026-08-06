@@ -166,6 +166,34 @@ const skillSuggestions: Record<string, { technical: string[]; soft: string[]; to
   },
 };
 
+const getEduLevel = (degree: string): string => {
+  const d = degree.toLowerCase();
+  if (d.includes('10th') || d.includes('x (10th)') || d.includes('matric')) return 'school_10';
+  if (d.includes('12th') || d.includes('xii (12th)') || d.includes('intermediate') || d.includes('school')) return 'school_12';
+  if (d.includes('m.tech') || d.includes('mtech') || d.includes('mba') || d.includes('master') || d.includes('m.s') || d.includes('msc') || d.includes('mca') || d.includes('pg') || d.includes('post')) return 'post_grad';
+  return 'under_grad'; // Default to under-grad
+};
+
+const getDegreeSuggestions = (level: string): string[] => {
+  switch (level) {
+    case 'post_grad': return ['M.Tech', 'M.S. / MS', 'MBA', 'M.Sc', 'MCA'];
+    case 'under_grad': return ['B.Tech', 'B.E. / BE', 'BCA', 'B.Sc', 'B.Com', 'BBA'];
+    case 'school_12': return ['Class XII (12th)'];
+    case 'school_10': return ['Class X (10th)'];
+    default: return ['B.Tech', 'M.Tech', 'Class XII (12th)', 'Class X (10th)'];
+  }
+};
+
+const getBranchSuggestions = (level: string): string[] => {
+  switch (level) {
+    case 'post_grad': return ['Computer Science', 'Data Science', 'AI & ML', 'Business Analytics', 'Finance'];
+    case 'under_grad': return ['Computer Science', 'Information Technology', 'Electronics', 'Commerce', 'General'];
+    case 'school_12': return ['Science (PCM)', 'Science (PCB)', 'Commerce', 'Arts'];
+    case 'school_10': return ['General'];
+    default: return ['Computer Science', 'Science (PCM)', 'Commerce', 'General'];
+  }
+};
+
 export default function HomePage() {
   const { resume, isGenerating, error, generateResume, reset, setResume } = useResume();
   const [form, setForm] = useState<ResumeForm>(initialForm);
@@ -655,130 +683,178 @@ export default function HomePage() {
                     No education entries added yet. Click "+ Add Entry" to build profile.
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                    {form.education.map((edu, idx) => (
-                      <div key={idx} className="bg-gray-950 border border-gray-850 p-4 rounded-xl relative space-y-3">
-                        <button
-                          onClick={() =>
-                            setForm(p => ({ ...p, education: p.education.filter((_, i) => i !== idx) }))
-                          }
-                          className="absolute top-2 right-2 text-xs text-red-500 hover:text-red-400"
-                        >
-                          Delete
-                        </button>
-                        <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-4 max-h-[360px] overflow-y-auto pr-2">
+                    {form.education.map((edu, idx) => {
+                      const level = getEduLevel(edu.degree);
+                      return (
+                        <div key={idx} className="bg-gray-950 border border-gray-850 p-4 rounded-xl relative space-y-4">
+                          <button
+                            onClick={() =>
+                              setForm(p => ({ ...p, education: p.education.filter((_, i) => i !== idx) }))
+                            }
+                            className="absolute top-2 right-2 text-xs text-red-500 hover:text-red-400 font-semibold"
+                          >
+                            Delete
+                          </button>
+
+                          {/* Level Selector */}
                           <div>
-                            <label className="text-[10px] text-gray-400">Institution *</label>
-                            <input
-                              type="text"
-                              value={edu.institution}
-                              onChange={e =>
-                                setForm(p => {
-                                  const eduList = [...p.education];
-                                  eduList[idx].institution = e.target.value;
-                                  return { ...p, education: eduList };
-                                })
-                              }
-                              placeholder="IIT Delhi"
-                              className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-gray-400">Degree *</label>
-                            <input
-                              type="text"
-                              value={edu.degree}
-                              onChange={e =>
-                                setForm(p => {
-                                  const eduList = [...p.education];
-                                  eduList[idx].degree = e.target.value;
-                                  return { ...p, education: eduList };
-                                })
-                              }
-                              placeholder="B.Tech"
-                              className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
-                            />
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              {['B.Tech', 'M.Tech', 'Class XII (12th)', 'Class X (10th)'].map(d => (
+                            <span className="text-[10px] text-gray-400 font-semibold block mb-1.5 uppercase tracking-wider">Education Level</span>
+                            <div className="flex gap-1.5 flex-wrap">
+                              {[
+                                { key: 'post_grad', label: "🎓 Post-Graduation (Master's)" },
+                                { key: 'under_grad', label: "🎓 Under-Graduation (Bachelor's)" },
+                                { key: 'school_12', label: "🏫 Class XII (12th Grade)" },
+                                { key: 'school_10', label: "🏫 Class X (10th Grade)" }
+                              ].map(lvl => (
                                 <button
-                                  key={d}
+                                  key={lvl.key}
                                   type="button"
                                   onClick={() => setForm(p => {
                                     const eduList = [...p.education];
-                                    eduList[idx].degree = d;
+                                    if (lvl.key === 'school_10') {
+                                      eduList[idx].degree = 'Class X (10th)';
+                                      eduList[idx].branch = 'General';
+                                    } else if (lvl.key === 'school_12') {
+                                      eduList[idx].degree = 'Class XII (12th)';
+                                      eduList[idx].branch = 'Science (PCM)';
+                                    } else if (lvl.key === 'post_grad') {
+                                      eduList[idx].degree = 'M.Tech';
+                                      eduList[idx].branch = 'Computer Science';
+                                    } else {
+                                      eduList[idx].degree = 'B.Tech';
+                                      eduList[idx].branch = 'Computer Science';
+                                    }
                                     return { ...p, education: eduList };
                                   })}
-                                  className="text-[9px] bg-gray-900 border border-gray-850 px-2 py-0.5 rounded text-gray-400 hover:border-violet-500 hover:text-white"
+                                  className={`text-[10px] px-2.5 py-1 rounded border font-semibold transition-all
+                                    ${level === lvl.key 
+                                      ? 'bg-violet-900/30 border-violet-600 text-violet-300 shadow-sm shadow-violet-500/5' 
+                                      : 'bg-gray-900 border-gray-850 text-gray-400 hover:border-gray-700 hover:text-white'}`}
                                 >
-                                  {d}
+                                  {lvl.label}
                                 </button>
                               ))}
                             </div>
                           </div>
-                          <div>
-                            <label className="text-[10px] text-gray-400">Branch *</label>
-                            <input
-                              type="text"
-                              value={edu.branch}
-                              onChange={e =>
-                                setForm(p => {
-                                  const eduList = [...p.education];
-                                  eduList[idx].branch = e.target.value;
-                                  return { ...p, education: eduList };
-                                })
-                              }
-                              placeholder="Computer Science"
-                              className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
-                            />
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              {['Computer Science', 'Science (PCM)', 'Commerce', 'General'].map(b => (
-                                <button
-                                  key={b}
-                                  type="button"
-                                  onClick={() => setForm(p => {
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[10px] text-gray-400 font-semibold block mb-1">Institution / School Name *</label>
+                              <input
+                                type="text"
+                                value={edu.institution}
+                                onChange={e =>
+                                  setForm(p => {
                                     const eduList = [...p.education];
-                                    eduList[idx].branch = b;
+                                    eduList[idx].institution = e.target.value;
                                     return { ...p, education: eduList };
-                                  })}
-                                  className="text-[9px] bg-gray-900 border border-gray-850 px-2 py-0.5 rounded text-gray-400 hover:border-violet-500 hover:text-white"
-                                >
-                                  {b}
-                                </button>
-                              ))}
+                                  })
+                                }
+                                placeholder={
+                                  level === 'school_10' || level === 'school_12' 
+                                    ? "St. Xavier's High School" 
+                                    : "Delhi University / IIT Delhi"
+                                }
+                                className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
+                              />
                             </div>
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-gray-400">CGPA / Percentage</label>
-                            <input
-                              type="text"
-                              value={edu.gpa}
-                              onChange={e =>
-                                setForm(p => {
-                                  const eduList = [...p.education];
-                                  eduList[idx].gpa = e.target.value;
-                                  return { ...p, education: eduList };
-                                })
-                              }
-                              placeholder="8.5/10"
-                              className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-gray-400">Start Year</label>
-                            <input
-                              type="text"
-                              value={edu.startYear}
-                              onChange={e =>
-                                setForm(p => {
-                                  const eduList = [...p.education];
-                                  eduList[idx].startYear = e.target.value;
-                                  return { ...p, education: eduList };
-                                })
-                              }
-                              placeholder="2018"
-                              className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white"
-                            />
-                          </div>
+                            <div>
+                              <label className="text-[10px] text-gray-400 font-semibold block mb-1">Degree / Qualification *</label>
+                              <input
+                                type="text"
+                                value={edu.degree}
+                                onChange={e =>
+                                  setForm(p => {
+                                    const eduList = [...p.education];
+                                    eduList[idx].degree = e.target.value;
+                                    return { ...p, education: eduList };
+                                  })
+                                }
+                                placeholder="B.Tech"
+                                className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
+                              />
+                              <div className="flex gap-1 mt-1 flex-wrap">
+                                {getDegreeSuggestions(level).map(d => (
+                                  <button
+                                    key={d}
+                                    type="button"
+                                    onClick={() => setForm(p => {
+                                      const eduList = [...p.education];
+                                      eduList[idx].degree = d;
+                                      return { ...p, education: eduList };
+                                    })}
+                                    className="text-[9px] bg-gray-900 border border-gray-850 px-2 py-0.5 rounded text-gray-400 hover:border-violet-500 hover:text-white transition-colors"
+                                  >
+                                    {d}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-gray-400 font-semibold block mb-1">Stream / Field of Study *</label>
+                              <input
+                                type="text"
+                                value={edu.branch}
+                                onChange={e =>
+                                  setForm(p => {
+                                    const eduList = [...p.education];
+                                    eduList[idx].branch = e.target.value;
+                                    return { ...p, education: eduList };
+                                  })
+                                }
+                                placeholder="Computer Science"
+                                className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
+                              />
+                              <div className="flex gap-1 mt-1 flex-wrap">
+                                {getBranchSuggestions(level).map(b => (
+                                  <button
+                                    key={b}
+                                    type="button"
+                                    onClick={() => setForm(p => {
+                                      const eduList = [...p.education];
+                                      eduList[idx].branch = b;
+                                      return { ...p, education: eduList };
+                                    })}
+                                    className="text-[9px] bg-gray-900 border border-gray-850 px-2 py-0.5 rounded text-gray-400 hover:border-violet-500 hover:text-white transition-colors"
+                                  >
+                                    {b}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-gray-400 font-semibold block mb-1">CGPA / Percentage *</label>
+                              <input
+                                type="text"
+                                value={edu.gpa}
+                                onChange={e =>
+                                  setForm(p => {
+                                    const eduList = [...p.education];
+                                    eduList[idx].gpa = e.target.value;
+                                    return { ...p, education: eduList };
+                                  })
+                                }
+                                placeholder="8.5/10 or 90%"
+                                className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-gray-400 font-semibold block mb-1">Start Year *</label>
+                              <input
+                                type="text"
+                                value={edu.startYear}
+                                onChange={e =>
+                                  setForm(p => {
+                                    const eduList = [...p.education];
+                                    eduList[idx].startYear = e.target.value;
+                                    return { ...p, education: eduList };
+                                  })
+                                }
+                                placeholder="2020"
+                                className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
+                              />
+                            </div>
                           <div>
                             <label className="text-[10px] text-gray-400">End Year</label>
                             <input
