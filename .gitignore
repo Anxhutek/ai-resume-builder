@@ -23,3 +23,6 @@ Thumbs.db
 .idea/
 *.swp
 venv310/
+test_*.py
+check_*.py
+find_*.py

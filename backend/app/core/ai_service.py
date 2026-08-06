@@ -18,14 +18,14 @@ class GeminiService:
     def __init__(self):
         genai.configure(api_key=settings.GEMINI_API_KEY)
         self.model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
+            model_name="gemini-3.5-flash",
             generation_config={
                 "temperature": 0.7,
                 "top_p": 0.95,
                 "max_output_tokens": 8192,
             },
         )
-        logger.info("Gemini AI Service initialized (gemini-2.0-flash)")
+        logger.info("Gemini AI Service initialized (gemini-3.5-flash)")
 
     async def generate_resume(
         self,
