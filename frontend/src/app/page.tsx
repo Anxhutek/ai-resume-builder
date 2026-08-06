@@ -195,6 +195,11 @@ const getBranchSuggestions = (level: string): string[] => {
   }
 };
 
+const isHigherEducation = (degree: string): boolean => {
+  const d = degree.toLowerCase();
+  return d.includes('b.tech') || d.includes('b.e') || d.includes('bca') || d.includes('m.tech') || d.includes('mba') || d.includes('m.s') || d.includes('mca') || d.includes('graduation') || d.includes('bachelor') || d.includes('master');
+};
+
 export default function HomePage() {
   const { resume, isGenerating, error, generateResume, reset, setResume } = useResume();
   const [form, setForm] = useState<ResumeForm>(initialForm);
@@ -874,46 +879,76 @@ export default function HomePage() {
                             </div>
 
                             {/* Semester GPA Grid (Auto calculations) */}
-                            {edu.semesters && (
-                              <div className="col-span-2 bg-gray-900/40 border border-gray-850 p-3 rounded-lg space-y-2 mt-1">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">📊 Semester GPA Breakdown (Optional)</span>
-                                  <span className="text-[9px] text-violet-400 italic">Auto-calculates overall CGPA</span>
-                                </div>
-                                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                                  {edu.semesters.map((semVal, semIdx) => (
-                                    <div key={semIdx}>
-                                      <label className="text-[9px] text-gray-500 block mb-0.5 font-semibold text-center">Sem {semIdx + 1}</label>
-                                      <input
-                                        type="text"
-                                        value={semVal}
-                                        onChange={e => {
-                                          const val = e.target.value;
-                                          setForm(p => {
-                                            const eduList = [...p.education];
-                                            const semList = [...(eduList[idx].semesters || [])];
-                                            semList[semIdx] = val;
-                                            eduList[idx].semesters = semList;
-
-                                            // Calculate average of filled semesters
-                                            const filledValues = semList
-                                              .map(v => parseFloat(v))
-                                              .filter(v => !isNaN(v));
-                                            
-                                            if (filledValues.length > 0) {
-                                              const avg = filledValues.reduce((sum, curr) => sum + curr, 0) / filledValues.length;
-                                              eduList[idx].gpa = `${avg.toFixed(2)} CGPA`;
-                                            }
-                                            
-                                            return { ...p, education: eduList };
-                                          });
-                                        }}
-                                        placeholder="8.5"
-                                        className="w-full bg-gray-950 border border-gray-800 rounded px-1.5 py-1 text-center text-xs text-white placeholder-gray-700 focus:border-violet-500 focus:outline-none transition-all"
-                                      />
+                            {isHigherEducation(edu.degree) && (
+                              <div className="col-span-2 mt-1">
+                                {!edu.semesters ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setForm(p => {
+                                      const eduList = [...p.education];
+                                      const isPG = edu.degree.toLowerCase().includes('m.tech') || edu.degree.toLowerCase().includes('mba') || edu.degree.toLowerCase().includes('master');
+                                      eduList[idx].semesters = Array(isPG ? 4 : 8).fill('');
+                                      return { ...p, education: eduList };
+                                    })}
+                                    className="text-[10px] text-violet-400 hover:text-violet-300 font-semibold flex items-center gap-1.5 p-1 bg-gray-950 border border-gray-850 hover:border-violet-500/50 rounded-lg transition-all"
+                                  >
+                                    📊 Add Semester-wise GPA Breakdown (SGPA/CGPA)
+                                  </button>
+                                ) : (
+                                  <div className="bg-gray-900/40 border border-gray-850 p-3 rounded-lg space-y-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">📊 Semester GPA Breakdown</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setForm(p => {
+                                          const eduList = [...p.education];
+                                          delete eduList[idx].semesters;
+                                          return { ...p, education: eduList };
+                                        })}
+                                        className="text-[9px] text-red-500 hover:text-red-400 font-semibold"
+                                      >
+                                        Remove Breakdown
+                                      </button>
                                     </div>
-                                  ))}
-                                </div>
+                                    <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+                                      {edu.semesters.map((semVal, semIdx) => (
+                                        <div key={semIdx}>
+                                          <label className="text-[9px] text-gray-500 block mb-0.5 font-semibold text-center">Sem {semIdx + 1}</label>
+                                          <input
+                                            type="text"
+                                            value={semVal}
+                                            onChange={e => {
+                                              const val = e.target.value;
+                                              setForm(p => {
+                                                const eduList = [...p.education];
+                                                const semList = [...(eduList[idx].semesters || [])];
+                                                semList[semIdx] = val;
+                                                eduList[idx].semesters = semList;
+
+                                                // Calculate average of filled semesters
+                                                const filledValues = semList
+                                                  .map(v => parseFloat(v))
+                                                  .filter(v => !isNaN(v));
+                                                
+                                                if (filledValues.length > 0) {
+                                                  const avg = filledValues.reduce((sum, curr) => sum + curr, 0) / filledValues.length;
+                                                  eduList[idx].gpa = `${avg.toFixed(2)} CGPA`;
+                                                }
+                                                
+                                                return { ...p, education: eduList };
+                                              });
+                                            }}
+                                            placeholder="8.5"
+                                            className="w-full bg-gray-950 border border-gray-800 rounded px-1.5 py-1 text-center text-xs text-white placeholder-gray-700 focus:border-violet-500 focus:outline-none transition-all"
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div className="text-[9px] text-gray-500 italic mt-1 text-right">
+                                      * Overall CGPA field will auto-update as you fill these semester values.
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                             <div>
