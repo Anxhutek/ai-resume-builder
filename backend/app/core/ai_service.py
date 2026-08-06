@@ -102,25 +102,46 @@ class GeminiService:
             lines = [l.strip() for l in raw_edu.split('\n') if l.strip()]
             for line in lines:
                 degree = "Degree / Class"
-                institution = "Institution"
+                branch = "Branch"
+                institution = "Institution Name"
                 year = "2024"
-                if " from " in line:
-                    parts = line.split(" from ")
-                    degree = parts[0].strip()
-                    rem = parts[1].strip()
-                    if " (Year: " in rem:
-                        i_parts = rem.split(" (Year: ")
-                        institution = i_parts[0].strip()
-                        year = i_parts[1].replace(")", "").strip()
+                gpa = "8.5"
+                
+                # Format: "{degree} in {branch} at {institution} ({startYear}-{endYear}), GPA: {gpa}"
+                try:
+                    if " in " in line and " at " in line:
+                        d_parts = line.split(" in ")
+                        degree = d_parts[0].strip()
+                        rem = d_parts[1].strip()
+                        
+                        b_parts = rem.split(" at ")
+                        branch = b_parts[0].strip()
+                        rem2 = b_parts[1].strip()
+                        
+                        if " (" in rem2:
+                            i_parts = rem2.split(" (")
+                            institution = i_parts[0].strip()
+                            rem3 = i_parts[1].strip()
+                            
+                            if ")" in rem3:
+                                y_parts = rem3.split(")")
+                                year = y_parts[0].strip()
+                                rem4 = y_parts[1].strip()
+                                if ", GPA: " in rem4:
+                                    gpa = rem4.split(", GPA: ")[1].strip()
+                        else:
+                            institution = rem2
                     else:
-                        institution = rem
-                else:
+                        degree = line
+                except Exception as parse_err:
+                    logger.warning(f"Error parsing fallback education line: {parse_err}")
                     degree = line
+
                 education_list.append({
                     "degree": degree,
                     "institution": institution,
                     "year": year,
-                    "gpa": "8.5/10",
+                    "gpa": gpa,
                     "relevant_courses": ["Core Curriculum", "Applied Project Work"]
                 })
         else:
@@ -143,23 +164,39 @@ class GeminiService:
                 title = "Software Developer"
                 company = "Company"
                 duration = "2023 - Present"
-                if " at " in line:
-                    parts = line.split(" at ")
-                    title = parts[0].strip()
-                    rem = parts[1].strip()
-                    if " (" in rem:
+                bullets = []
+                
+                # Format: "{role} at {company} ({startDate} to {endDate}): {bullets}"
+                try:
+                    if " at " in line and " (" in line:
+                        r_parts = line.split(" at ")
+                        title = r_parts[0].strip()
+                        rem = r_parts[1].strip()
+                        
                         c_parts = rem.split(" (")
                         company = c_parts[0].strip()
-                        duration = c_parts[1].replace(")", "").strip()
+                        rem2 = c_parts[1].strip()
+                        
+                        if "): " in rem2:
+                            d_parts = rem2.split("): ")
+                            duration = d_parts[0].strip()
+                            bullets_str = d_parts[1].strip()
+                            if bullets_str:
+                                bullets = [b.strip() for b in bullets_str.split(". ") if b.strip()]
+                        else:
+                            if ")" in rem2:
+                                duration = rem2.split(")")[0].strip()
                     else:
-                        company = rem
-                else:
+                        title = line
+                except Exception as parse_err:
+                    logger.warning(f"Error parsing fallback experience line: {parse_err}")
                     title = line
                 
-                bullets = [
-                    f"Spearheaded key development modules for {title} implementations, improving execution workflow by 15%.",
-                    f"Developed REST integrations and optimized pipeline execution standards at {company} to secure code delivery."
-                ]
+                if not bullets:
+                    bullets = [
+                        f"Spearheaded key development modules for {title} implementations, improving execution workflow by 15%.",
+                        f"Developed REST integrations and optimized pipeline execution standards at {company} to secure code delivery."
+                    ]
                 experience_list.append({
                     "title": title,
                     "company": company,
@@ -178,18 +215,29 @@ class GeminiService:
                 pname = "Project"
                 description = "Automated system built using modern stack features."
                 tech_stack = ["FastAPI", "React"]
-                if ":" in line:
-                    parts = line.split(":")
-                    pname = parts[0].strip()
-                    desc_part = parts[1].strip()
-                    if " (Tech: " in desc_part:
-                        d_parts = desc_part.split(" (Tech: ")
-                        description = d_parts[0].strip()
-                        tech_str = d_parts[1].replace(")", "").strip()
-                        tech_stack = [t.strip() for t in tech_str.split(",") if t.strip()]
+                
+                # Format: "{name} ({duration}): {description}. Tech stack: {tech_stack}"
+                try:
+                    if " (" in line and "): " in line:
+                        n_parts = line.split(" (")
+                        pname = n_parts[0].strip()
+                        rem = n_parts[1].strip()
+                        
+                        d_parts = rem.split("): ")
+                        duration = d_parts[0].strip()
+                        rem2 = d_parts[1].strip()
+                        
+                        if ". Tech stack: " in rem2:
+                            t_parts = rem2.split(". Tech stack: ")
+                            description = t_parts[0].strip()
+                            tech_str = t_parts[1].strip()
+                            tech_stack = [t.strip() for t in tech_str.split(",") if t.strip()]
+                        else:
+                            description = rem2
                     else:
-                        description = desc_part
-                else:
+                        pname = line
+                except Exception as parse_err:
+                    logger.warning(f"Error parsing fallback project line: {parse_err}")
                     pname = line
 
                 project_list.append({
