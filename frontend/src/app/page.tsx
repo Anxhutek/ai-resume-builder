@@ -1785,24 +1785,58 @@ export default function HomePage() {
             {/* STEP 14: AI Enhancements */}
             {step === 14 && (
               <div className="space-y-4">
-                <h3 className="font-semibold text-white text-lg">AI Optimizations</h3>
-                <p className="text-xs text-gray-500">Select which enhancements the CTO Agent should apply automatically.</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-semibold text-white text-lg">AI Optimizations & Tailoring</h3>
+                  <p className="text-xs text-gray-400">Select which enhancements the AI engine should apply automatically before generating your resume sheet.</p>
+                </div>
+
+                {/* Educational/Guidance Banner */}
+                <div className="bg-violet-950/20 border border-violet-900/40 p-4 rounded-xl space-y-2">
+                  <h4 className="text-xs font-bold text-violet-300 flex items-center gap-1.5 uppercase tracking-wide">
+                    💡 What happens here & What to do?
+                  </h4>
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    Aapka core data input complete ho chuka hai. Final resume compilation se pehle, niche diye gaye toggle select karein. Humara AI model in instructions ke mutabik aapke raw inputs ko standard recruiters ke expectations aur corporate standards ke anusaar modify kar dega:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                   {[
-                    { id: 'summary', name: '✔ Generate Professional Summary', desc: 'Pre-seeds a strong tailored introduction.' },
-                    { id: 'experience', name: '✔ Rewrite Experience Bullets', desc: 'Uses strong action verbs and metrics.' },
-                    { id: 'projects', name: '✔ Rewrite Projects Details', desc: 'Adds clarity and highlights tech stacks.' },
-                    { id: 'ats', name: '✔ ATS Optimization', desc: 'Naturally injects missing keywords.' },
+                    { 
+                      id: 'summary', 
+                      name: '✔ Generate Professional Summary', 
+                      desc: 'Pre-seeds a strong tailored introduction.',
+                      detail: 'Aapke projects aur target role ke data ko mix karke profile ke top par ek strong summary points write karega.' 
+                    },
+                    { 
+                      id: 'experience', 
+                      name: '✔ Rewrite Experience Bullets', 
+                      desc: 'Uses strong action verbs and metrics.',
+                      detail: 'Aapke previous roles ke bullet points ko professional active verbs (Led, Managed) ke sath convert karega.' 
+                    },
+                    { 
+                      id: 'projects', 
+                      name: '✔ Rewrite Projects Details', 
+                      desc: 'Adds clarity and highlights tech stacks.',
+                      detail: 'Project description ko point-wise enhance karega aur core stack keywords ko clean highlight format mein display karega.' 
+                    },
+                    { 
+                      id: 'ats', 
+                      name: '✔ ATS Optimization', 
+                      desc: 'Naturally injects missing keywords.',
+                      detail: 'Target role aur job description ke missing industry keywords ko aapki skills list mein automatic fit karega.' 
+                    },
                   ].map(feat => (
-                    <div key={feat.id} className="p-3 bg-gray-950 border border-gray-850 rounded-xl flex items-start gap-3">
+                    <div key={feat.id} className="p-3.5 bg-gray-950 border border-gray-850 rounded-xl flex items-start gap-3 hover:border-gray-800 transition-all">
                       <input
                         type="checkbox"
                         defaultChecked
-                        className="mt-1 rounded border-gray-800 bg-gray-900 text-violet-600 focus:ring-0"
+                        className="mt-1 rounded border-gray-800 bg-gray-900 text-violet-600 focus:ring-0 cursor-pointer"
                       />
-                      <div>
+                      <div className="space-y-1">
                         <h4 className="font-semibold text-xs text-white">{feat.name}</h4>
-                        <p className="text-[10px] text-gray-500 mt-0.5">{feat.desc}</p>
+                        <p className="text-[10px] text-violet-400/90 font-medium">{feat.desc}</p>
+                        <p className="text-[10px] text-gray-500 leading-normal">{feat.detail}</p>
                       </div>
                     </div>
                   ))}
