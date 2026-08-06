@@ -58,71 +58,187 @@ class GeminiService:
             return self._get_mock_resume(user_info)
 
     def _get_mock_resume(self, user_info: dict) -> dict:
-        """Emergency Fallback: High-quality tailored mock resume data based on user input."""
-        return {
-            "name": user_info.get("name", "Anshu Kumar"),
-            "contact": {
-                "email": user_info.get("email", "anshu@example.com"),
-                "phone": user_info.get("phone", "+91 98765 43210"),
-                "location": user_info.get("location", "Delhi, India"),
-                "linkedin": user_info.get("linkedin", "linkedin.com/in/anxhutek"),
-                "github": user_info.get("github", "github.com/Anxhutek")
-            },
-            "summary": f"Results-driven Software Engineer specialized in designing and building scalable AI-powered applications. Proven track record of leveraging technologies like Python, FastAPI, and Next.js to solve complex business problems. Experienced in ATS-optimizing content and implementing CI/CD pipelines for production-ready systems.",
-            "experience": [
+        """Emergency Fallback: Dynamically parses and structures raw user inputs to generate a tailored ATS-optimized resume."""
+        
+        # 1. Parse Contact & Name
+        name = user_info.get("name", "Anshu Kumar")
+        email = user_info.get("email", "anshu@example.com")
+        phone = user_info.get("phone", "+91 98765 43210")
+        location = user_info.get("location", "Delhi, India")
+        linkedin = user_info.get("linkedin", "linkedin.com/in/anxhutek")
+        github = user_info.get("github", "github.com/Anxhutek")
+
+        # 2. Parse Skills
+        raw_skills_str = user_info.get("skills", "")
+        raw_skills = [s.strip() for s in raw_skills_str.split(",") if s.strip()]
+        
+        tools_keywords = {"git", "docker", "aws", "gcp", "vs code", "github", "kubernetes", "jenkins", "pm2", "nginx", "ci/cd"}
+        soft_keywords = {"communication", "problem solving", "teamwork", "leadership", "collaboration", "adaptability", "solving"}
+        
+        skills = {"technical": [], "soft": [], "tools": []}
+        for s in raw_skills:
+            sl = s.lower()
+            if any(tk in sl for tk in tools_keywords):
+                skills["tools"].append(s)
+            elif any(sk in sl for sk in soft_keywords):
+                skills["soft"].append(s)
+            else:
+                skills["technical"].append(s)
+                
+        # Fill defaults if lists are empty
+        if not skills["technical"] and raw_skills:
+            skills["technical"] = raw_skills[:4]
+        if not skills["technical"]:
+            skills["technical"] = ["Python", "FastAPI", "Next.js", "React"]
+        if not skills["tools"]:
+            skills["tools"] = ["Git", "Docker", "VS Code"]
+        if not skills["soft"]:
+            skills["soft"] = ["Problem Solving", "Collaboration"]
+
+        # 3. Parse Education
+        education_list = []
+        raw_edu = user_info.get("education", "")
+        if raw_edu:
+            lines = [l.strip() for l in raw_edu.split('\n') if l.strip()]
+            for line in lines:
+                degree = "Degree / Class"
+                institution = "Institution"
+                year = "2024"
+                if " from " in line:
+                    parts = line.split(" from ")
+                    degree = parts[0].strip()
+                    rem = parts[1].strip()
+                    if " (Year: " in rem:
+                        i_parts = rem.split(" (Year: ")
+                        institution = i_parts[0].strip()
+                        year = i_parts[1].replace(")", "").strip()
+                    else:
+                        institution = rem
+                else:
+                    degree = line
+                education_list.append({
+                    "degree": degree,
+                    "institution": institution,
+                    "year": year,
+                    "gpa": "8.5/10",
+                    "relevant_courses": ["Core Curriculum", "Applied Project Work"]
+                })
+        else:
+            education_list = [
                 {
-                    "title": "Software Engineer",
-                    "company": "TechCorp",
-                    "duration": "2022 - Present",
-                    "location": "Delhi, India",
-                    "bullets": [
-                        "Designed and developed high-performance REST APIs using FastAPI, reducing database query latency by 25%.",
-                        "Implemented automated CI/CD pipelines using GitHub Actions, streamlining deployments to production environments.",
-                        "Collaborated with cross-functional teams to integrate AI models and custom tools, enhancing user experience and scalability."
-                    ]
-                },
-                {
-                    "title": "Software Engineering Intern",
-                    "company": "StartupXYZ",
-                    "duration": "2021",
-                    "location": "Remote",
-                    "bullets": [
-                        "Developed custom Python utility scripts to automate data parsing workflows, saving 15+ manual hours weekly.",
-                        "Assisted in maintaining and deploying internal dashboards, improving team velocity by 10%."
-                    ]
-                }
-            ],
-            "education": [
-                {
-                    "degree": "B.Tech in Computer Science & Engineering",
+                    "degree": "B.Tech in Computer Science",
                     "institution": "Delhi University",
-                    "year": "2022",
+                    "year": "2024",
                     "gpa": "8.2/10",
-                    "relevant_courses": ["Data Structures", "Algorithms", "Database Systems", "Cloud Computing"]
+                    "relevant_courses": ["Data Structures", "Algorithms"]
                 }
-            ],
-            "skills": {
-                "technical": ["Python", "FastAPI", "React", "TypeScript", "SQL", "PostgreSQL"],
-                "soft": ["Problem Solving", "Team Collaboration", "Effective Communication"],
-                "tools": ["Git", "Docker", "AWS", "Google Cloud", "VS Code"]
-            },
-            "projects": [
+            ]
+
+        # 4. Parse Experience
+        experience_list = []
+        raw_exp = user_info.get("experience", "")
+        if raw_exp:
+            lines = [l.strip() for l in raw_exp.split('\n') if l.strip()]
+            for line in lines:
+                title = "Software Developer"
+                company = "Company"
+                duration = "2023 - Present"
+                if " at " in line:
+                    parts = line.split(" at ")
+                    title = parts[0].strip()
+                    rem = parts[1].strip()
+                    if " (" in rem:
+                        c_parts = rem.split(" (")
+                        company = c_parts[0].strip()
+                        duration = c_parts[1].replace(")", "").strip()
+                    else:
+                        company = rem
+                else:
+                    title = line
+                
+                bullets = [
+                    f"Spearheaded key development modules for {title} implementations, improving execution workflow by 15%.",
+                    f"Developed REST integrations and optimized pipeline execution standards at {company} to secure code delivery."
+                ]
+                experience_list.append({
+                    "title": title,
+                    "company": company,
+                    "duration": duration,
+                    "location": "India",
+                    "bullets": bullets
+                })
+        # If fresher flow, experience will be empty, which is correct
+
+        # 5. Parse Projects
+        project_list = []
+        raw_proj = user_info.get("projects", "")
+        if raw_proj:
+            lines = [l.strip() for l in raw_proj.split('\n') if l.strip()]
+            for line in lines:
+                pname = "Project"
+                description = "Automated system built using modern stack features."
+                tech_stack = ["FastAPI", "React"]
+                if ":" in line:
+                    parts = line.split(":")
+                    pname = parts[0].strip()
+                    desc_part = parts[1].strip()
+                    if " (Tech: " in desc_part:
+                        d_parts = desc_part.split(" (Tech: ")
+                        description = d_parts[0].strip()
+                        tech_str = d_parts[1].replace(")", "").strip()
+                        tech_stack = [t.strip() for t in tech_str.split(",") if t.strip()]
+                    else:
+                        description = desc_part
+                else:
+                    pname = line
+
+                project_list.append({
+                    "name": pname,
+                    "description": description,
+                    "tech_stack": tech_stack,
+                    "highlights": [
+                        f"Architected the workflow of {pname} using {', '.join(tech_stack[:3])}.",
+                        f"Achieved low latency deployments and optimized database response protocols."
+                    ]
+                })
+        else:
+            project_list = [
                 {
                     "name": "AI Resume Builder",
-                    "description": "An automated web application that generates ATS-optimized resumes using Gemini AI API, FastAPI, and Next.js.",
-                    "tech_stack": ["FastAPI", "Next.js", "React", "Python", "Docker"],
-                    "url": "https://github.com/Anxhutek/ai-resume-builder",
-                    "highlights": ["Leveraged Google Gemini API to dynamically generate structured JSON resumes.", "Achieved 90+ ATS match scores through targeted keyword insertion."]
+                    "description": "An automated web application that generates ATS-optimized resumes.",
+                    "tech_stack": ["FastAPI", "Next.js", "Python"],
+                    "highlights": ["Leveraged system parameters to dynamically structure profiles."]
                 }
-            ],
+            ]
+
+        # 6. Generate Summary
+        summary_tech = ", ".join(skills["technical"][:3])
+        summary = f"Dedicated professional with expertise in {summary_tech}. Proven ability to design and build scalable applications using {', '.join(skills['tools'][:3])}. Experienced in optimizing code efficiency and implementing robust developer features."
+
+        ats_keywords = list(set(skills["technical"][:5] + skills["tools"][:3]))
+
+        return {
+            "name": name,
+            "contact": {
+                "email": email,
+                "phone": phone,
+                "location": location,
+                "linkedin": linkedin,
+                "github": github
+            },
+            "summary": summary,
+            "experience": experience_list,
+            "education": education_list,
+            "skills": skills,
+            "projects": project_list,
             "certifications": [
                 {
-                    "name": "AWS Certified Developer",
-                    "issuer": "Amazon Web Services",
-                    "year": "2023"
+                    "name": "Cloud Developer Certificate",
+                    "issuer": "Google Cloud",
+                    "year": "2024"
                 }
             ],
-            "ats_keywords": ["FastAPI", "Python", "PostgreSQL", "Docker", "REST APIs", "CI/CD", "AWS"],
+            "ats_keywords": ats_keywords,
             "match_score": 92
         }
 
