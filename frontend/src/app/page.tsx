@@ -205,6 +205,39 @@ export default function HomePage() {
   const [form, setForm] = useState<ResumeForm>(initialForm);
   const [step, setStep] = useState(1);
   const [aiSuggestionsActive, setAiSuggestionsActive] = useState(false);
+  const [universities, setUniversities] = useState<string[]>([]);
+  const [activeUniFocusIdx, setActiveUniFocusIdx] = useState<number | null>(null);
+
+  // Fetch country-specific universities when on Step 4 (Education History)
+  useEffect(() => {
+    if (step === 4) {
+      const countryName = form.country || 'India';
+      fetch(`https://universities.hipolabs.com/search?country=${encodeURIComponent(countryName)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const list = data.map((uni: any) => uni.name);
+            const uniqueList = Array.from(new Set(list)).sort() as string[];
+            setUniversities(uniqueList);
+          }
+        })
+        .catch(err => {
+          console.error("API error fetching universities, loading default fallback list:", err);
+          // Fallback list of popular colleges
+          setUniversities([
+            "ABES Engineering College",
+            "Indian Institute of Technology Delhi (IIT Delhi)",
+            "Indian Institute of Technology Bombay (IIT Bombay)",
+            "Delhi University (DU)",
+            "Birla Institute of Technology and Science (BITS Pilani)",
+            "Vellore Institute of Technology (VIT)",
+            "National Institute of Technology Trichy (NIT Trichy)",
+            "Amity University",
+            "Delhi Technological University (DTU)"
+          ]);
+        });
+    }
+  }, [step, form.country]);
 
   const handleSelectHighestLvl = (lvl: string) => {
     let seeded: Array<any> = [];
@@ -777,11 +810,13 @@ export default function HomePage() {
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
-                            <div>
+                            <div className="relative">
                               <label className="text-[10px] text-gray-400 font-semibold block mb-1">Institution / School Name *</label>
                               <input
                                 type="text"
                                 value={edu.institution}
+                                onFocus={() => setActiveUniFocusIdx(idx)}
+                                onBlur={() => setTimeout(() => setActiveUniFocusIdx(null), 250)}
                                 onChange={e =>
                                   setForm(p => {
                                     const eduList = [...p.education];
@@ -796,6 +831,34 @@ export default function HomePage() {
                                 }
                                 className="w-full bg-gray-900 border border-gray-800 rounded px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:border-violet-500 focus:outline-none transition-all"
                               />
+
+                              {/* University Autocomplete Suggestions */}
+                              {activeUniFocusIdx === idx && edu.institution.length >= 2 && (
+                                <div className="absolute z-50 bg-gray-950 border border-gray-800 rounded-xl mt-1 w-full max-h-[160px] overflow-y-auto shadow-2xl scrollbar-thin">
+                                  {(() => {
+                                    const query = edu.institution.toLowerCase();
+                                    const filtered = universities.filter(u => u.toLowerCase().includes(query)).slice(0, 10);
+                                    if (filtered.length === 0) return <div className="p-2.5 text-[10px] text-gray-600 text-center">No colleges found. Continue typing...</div>;
+                                    return filtered.map((uni, uIdx) => (
+                                      <button
+                                        key={uIdx}
+                                        type="button"
+                                        onMouseDown={() => {
+                                          setForm(p => {
+                                            const eduList = [...p.education];
+                                            eduList[idx].institution = uni;
+                                            return { ...p, education: eduList };
+                                          });
+                                          setActiveUniFocusIdx(null);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-[11px] text-gray-300 hover:bg-violet-600/20 hover:text-white transition-colors border-b border-gray-900/50 last:border-0"
+                                      >
+                                        🏫 {uni}
+                                      </button>
+                                    ));
+                                  })()}
+                                </div>
+                              )}
                             </div>
                             <div>
                               <label className="text-[10px] text-gray-400 font-semibold block mb-1">Degree / Qualification *</label>
